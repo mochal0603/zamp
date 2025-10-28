@@ -1,11 +1,31 @@
 #include <iostream>
 #include <dlfcn.h>
 #include <cassert>
+#include <array>
+#include <memory>
+#include <stdexcept>
+
 #include "AbstractInterp4Command.hh"
 
 using namespace std;
 
 
+
+std::string preprocessFile(const std::string& filePath) {
+  std::string command = "cpp -E -P " + filePath;
+  std::array<char, 4096> buffer{};
+  std::string result;
+
+  std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(command.c_str(), "r"), pclose);
+  if (!pipe) {
+    throw std::runtime_error("Nie udało się otworzyć potoku do preprocesora");
+  }
+
+  while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+    result += buffer.data();
+  }
+  return result;
+}
 int main()
 {
   void *pLibHnd_Move = dlopen("libInterp4Move.so",RTLD_LAZY);
