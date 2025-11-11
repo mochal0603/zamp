@@ -4,7 +4,7 @@
 #include <string>
 
 #include "AbstractInterp4Command.hh"
-#include "LibraryInterface.hh"
+#include "Libraryinterface.hh"
 
 LibInterface::LibInterface(): pLibHnd(NULL)
 {}

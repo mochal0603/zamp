@@ -9,8 +9,6 @@
 
 using namespace std;
 
-
-
 std::string preprocessFile(const std::string& filePath) {
   std::string command = "cpp -E -P " + filePath;
   std::array<char, 4096> buffer{};
@@ -26,27 +24,24 @@ std::string preprocessFile(const std::string& filePath) {
   }
   return result;
 }
-int main()
+
+void LoadAndShowPlugin(const std::string &libName)
 {
-  void *pLibHnd_Move = dlopen("libInterp4Move.so",RTLD_LAZY);
-  AbstractInterp4Command *(*pCreateCmd_Move)(void);
-  void *pFun;
-
-  if (!pLibHnd_Move) {
-    cerr << "!!! Brak biblioteki: libInterp4Move.so" << endl;
-    return 1;
+  void *pLibHnd = dlopen(libName.c_str(), RTLD_LAZY);
+  if (!pLibHnd) {
+    cerr << "!!! Brak biblioteki: " << libName << endl;
+    return;
   }
 
-
-  pFun = dlsym(pLibHnd_Move,"CreateCmd");
+  void *pFun = dlsym(pLibHnd, "CreateCmd");
   if (!pFun) {
-    cerr << "!!! Nie znaleziono funkcji CreateCmd" << endl;
-    return 1;
+    cerr << "!!! Nie znaleziono funkcji CreateCmd w " << libName << endl;
+    dlclose(pLibHnd);
+    return;
   }
-  pCreateCmd_Move = reinterpret_cast<AbstractInterp4Command* (*)(void)>(pFun);
 
-
-  AbstractInterp4Command *pCmd = pCreateCmd_Move();
+  auto pCreateCmd = reinterpret_cast<AbstractInterp4Command* (*)(void)>(pFun);
+  AbstractInterp4Command *pCmd = pCreateCmd();
 
   cout << endl;
   cout << pCmd->GetCmdName() << endl;
@@ -55,8 +50,16 @@ int main()
   cout << endl;
   pCmd->PrintCmd();
   cout << endl;
-  
-  delete pCmd;
 
-  dlclose(pLibHnd_Move);
+  delete pCmd;
+  dlclose(pLibHnd);
+}
+
+int main()
+{
+  LoadAndShowPlugin("libInterp4Move.so");
+  LoadAndShowPlugin("libInterp4Pause.so");
+  LoadAndShowPlugin("libInterp4Rotate.so");
+  LoadAndShowPlugin("libInterp4Set.so");
+  return 0;
 }
