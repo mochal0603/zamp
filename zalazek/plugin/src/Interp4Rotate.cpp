@@ -44,7 +44,7 @@ bool Interp4Rotate::ExecCmd( AbstractScene      &rScn,
                         AbstractComChannel &rComChann )
 {
 
-    
+    return true;
 }
 
 bool Interp4Rotate::ReadParams(std::istream& Strm_CmdsList)

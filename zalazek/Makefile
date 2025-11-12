@@ -2,8 +2,7 @@ __start__: obj __lines_for_space__ interp __plugin__
 	export LD_LIBRARY_PATH="./libs"; ./interp
 
 obj:
-	mkdir obj
-
+	mkdir -p obj
 
 __lines_for_space__:
 	@echo
@@ -12,29 +11,33 @@ __lines_for_space__:
 	@echo
 	@echo
 
-
 __plugin__:
 	cd plugin; make
 
+# ====== Flagi kompilacji i linkowania ======
 CPPFLAGS=-Wall -pedantic -std=c++17 -Iinc
 LDFLAGS=-Wall
+LDLIBS=-lxerces-c -ldl
 
+# ====== Pliki źródłowe i obiektowe ======
+SRC = src/main.cpp src/xmlinterp.cpp
+OBJ = $(SRC:src/%.cpp=obj/%.o)
 
+# ====== Budowanie programu ======
+interp: $(OBJ)
+	g++ $(LDFLAGS) -o $@ $(OBJ) $(LDLIBS)
 
+# ====== Reguła ogólna dla kompilacji plików .cpp ======
+obj/%.o: src/%.cpp
+	g++ -c $(CPPFLAGS) -o $@ $<
 
-interp: obj/main.o
-	g++ ${LDFLAGS} -o interp  obj/main.o -ldl
-
-obj/main.o: src/main.cpp inc/AbstractInterp4Command.hh inc/AbstractScene.hh\
-            inc/AbstractComChannel.hh
-	g++ -c ${CPPFLAGS} -o obj/main.o src/main.cpp
-
+# ====== Dokumentacja ======
 doc:
 	cd dox; make
 
+# ====== Czyszczenie ======
 clean:
 	rm -f obj/* interp core*
-
 
 clean_plugin:
 	cd plugin; make clean
@@ -62,4 +65,3 @@ help:
 	@echo "  make           # kompilacja i uruchomienie programu."
 	@echo "  make clean     # usuwa produkty kompilacji."
 	@echo
- 

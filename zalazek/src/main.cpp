@@ -6,6 +6,7 @@
 #include <stdexcept>
 
 #include "AbstractInterp4Command.hh"
+#include "xmlinterp.hh"
 
 using namespace std;
 
